@@ -39,28 +39,6 @@ var request = require('request'),
                 function(err, response, body) {
                     if (err) throw err;
 
-                    /* We will get: 
-                        {
-                            "events": [
-                                [
-                                    "waiting"
-                                ],
-                                [
-                                    "statusInfo",
-                                    {
-                                        "count": 23705,
-                                        "antinudeservers":[...],                               ],
-                                        "spyQueueTime": 0.0,
-                                        "antinudepercent": 1.0,
-                                        "spyeeQueueTime": 2.4784999847430003,
-                                        "timestamp": 1400408558.317384,
-                                        "servers": [...]                                        ]
-                                    }
-                                ]
-                            ],
-                            "clientID": "central2:vqkoz6581shr1n8nq0v5lwz9tyrshc"
-                        }
-                    */
                     body = JSON.parse(body);
                     console.log('Response received. Initialising.');
                     this.clientID = body.clientID;
@@ -197,22 +175,7 @@ var request = require('request'),
             }.bind(this))
             .on('SIGINT', function() {
                 this.disconnect();
-            }.bind(this))
-            .;
-            /*
-            setTimeout(function() {
-                this.typing();
-            }.bind(this), 1000);
-            setTimeout(function() {
-                this.send('Hiya ^_^');
-            }.bind(this), 5000);
-            setTimeout(function() {
-                this.typing();
-            }.bind(this), 6000);
-            setTimeout(function() {
-                this.send('How are you? ^_^');
-            }.bind(this), 11000);
-            */
+            }.bind(this);
         }.bind(this);
 
         this.setupEvents = function() {
