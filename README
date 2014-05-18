@@ -1,0 +1,25 @@
+Uses the Omegle API to chat to people.
+
+Unimplemented: Giving up and trying randoms, cameras.
+
+Uses readline to do so.
+
+Licence: WTFPL
+
+This took me 6 hours to learn and write and fix bugs in, so don't expect much.
+
+Requires a "likes.json" in $PWD with an array of common shared topics.
+
+Will die unexpectedly all the time due to lack of decent error checking.
+
+Works for me, YMMV.
+
+No warranty, blah blah blah.
+
+I do not claim any copy rights, rites, writes, wrongs or wongs, or hold any trade marks, warks, tarts, farts or plarts against Omegle. They own the backends that this uses.
+
+Written from scratch (ish) using request libraries.
+
+This isn't new, people have been doing this for a while so I hope I'm not being naughty by releasing this:
+
+https://github.com/nikkiii/omegle-api-java
