@@ -175,7 +175,7 @@ var request = require('request'),
             }.bind(this))
             .on('SIGINT', function() {
                 this.disconnect();
-            }.bind(this);
+            }.bind(this));
         }.bind(this);
 
         this.setupEvents = function() {
