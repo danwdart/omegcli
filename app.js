@@ -2,6 +2,7 @@ var request = require('request'),
     readline = require('readline'),
     fs = require('fs'),
     querystring = require('querystring'),
+    arrTopics = require('./likes'),
     App = function() {
         var endpoint = 'http://front2.omegle.com',
             strUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.132 Safari/537.36',
@@ -24,8 +25,7 @@ var request = require('request'),
         }.bind(this);
 
         this.login = function() {
-            var arrTopics = JSON.parse(fs.readFileSync(__dirname+'/likes.json')),
-                query = {
+            var query = {
                     rcs: 1,
                     firstevents: 1,
                     spid: '',
