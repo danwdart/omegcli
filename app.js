@@ -16,6 +16,7 @@ var request = require('request'),
 
         this.randid = (Math.floor(Math.random() * 100000000000 + 100000000000)).toString(36).toUpperCase();
         this.clientID = null;
+        this.isConnected = false;
 
         this.start = function() {
             this.login();
@@ -42,19 +43,73 @@ var request = require('request'),
                     body = JSON.parse(body);
                     console.log('Response received. Initialising.');
                     this.clientID = body.clientID;
+                    if ('undefined' !== typeof this.events) {
+                        this.parseEvents(body.events);
+                    }
                     this.events();
                 }.bind(this)
             );
         }.bind(this);
 
-        this.connected = function(arrCommonLikes) {
-            console.log('Connected. Common likes: '+arrCommonLikes.join(', '));
+        this.connected = function() {
+            this.isConnected = true;
+            console.log('Connected.');
             this.init();
         }.bind(this);
 
+        this.commonLikes = function(arrCommonLikes) {
+            console.log('Common likes: '+arrCommonLikes.join(', '));
+        }
+
+        this.strangerTyping = function() {
+            if (!this.isConnected) {
+                this.connected();
+            }
+
+            console.log('Stranger typing...');
+        }.bind(this);
+
         this.gotMessage = function(msg) {
+            if (!this.isConnected) {
+                this.connected();
+            }
             console.log('Stranger: '+msg);
-        };
+        }.bind(this);
+
+        this.parseEvents = function(body) {
+            for (var i = 0; i < body.length; i++) {
+                switch(body[i][0]) {
+                    case 'waiting':
+                        console.log('Waiting...');
+                        break;
+                    case 'connected':
+                        this.connected();
+                        break;
+                    case 'commonLikes':
+                        this.commonLikes(body[i][1]);
+                        break;
+                    case 'typing':
+                        this.strangerTyping();
+                        break;
+                    case 'stoppedTyping':
+                        console.log('Stranger stopped typing.');
+                        break;
+                    case 'gotMessage':
+                        this.gotMessage(body[i][1]);
+                        break;
+                    case 'strangerDisconnected':
+                        console.log('Stranger disconnected');
+                        this.disconnect();
+                        break;
+                    case 'statusInfo':
+                    case 'identDigests':
+                        break;
+                    default:
+                        console.log(body[i]);
+                        break;
+                }
+            }
+        }.bind(this);
 
         this.events = function() {
             request.post(
@@ -69,36 +124,17 @@ var request = require('request'),
                         body = JSON.parse(body);
                     } catch (err) {
                         console.log('Body was not JSON.');
+                        console.log(body);
                         process.exit(0);
                     }
 
                     if (null === body) {
                         console.log('Body was NULL');
                         this.disconnect();
-                    }
-                    else if ('waiting' == body[0][0]) {
-                        console.log('Waiting...');
-                    }
-                    else if ('connected' == body[0][0]) {
-                        this.connected(body[1][1]);
-                    }
-                    else if ('typing' == body[0][0]) {
-                        console.log('Stranger typing...');
-                    }
-                    else if ('stoppedTyping' == body[0][0]) {
-                        console.log('Stranger stopped typing.');
-                    }
-                    else if ('gotMessage' == body[0][0]) {
-                        this.gotMessage(body[0][1]);
-                    }
-                    else if ('strangerDisconnected' == body[0][0]) {
-                        console.log('Stranger disconnected');
-                        this.disconnect();
-                    }
-                    else {
-                        console.log(body);
+                        return;
                     }
 
+                    this.parseEvents(body);
                     this.events();
                 }.bind(this)
             );
