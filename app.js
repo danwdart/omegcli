@@ -18,6 +18,7 @@ var request = require('request'),
         this.randid = (Math.floor(Math.random() * 100000000000 + 100000000000)).toString(36).toUpperCase();
         this.clientID = null;
         this.isConnected = false;
+        this.rl = null;
 
         this.start = function() {
             this.login();
@@ -58,22 +59,29 @@ var request = require('request'),
         }.bind(this);
 
         this.commonLikes = function(arrCommonLikes) {
-            console.log('Common likes: '+arrCommonLikes.join(', '));
-        }
+            this.print('Common likes: '+arrCommonLikes.join(', '));
+        }.bind(this);
 
         this.strangerTyping = function() {
             if (!this.isConnected) {
                 this.connected();
             }
 
-            console.log('Stranger typing...');
+            this.print('Stranger typing...');
         }.bind(this);
 
         this.gotMessage = function(msg) {
             if (!this.isConnected) {
                 this.connected();
             }
-            console.log('Stranger: '+msg);
+            this.print('Stranger: '+msg);
+        }.bind(this);
+
+        this.print = function(msg) {
+            process.stdout.clearLine();
+            process.stdout.cursorTo(0);
+            console.log(msg);
+            this.rl.prompt(true);
         }.bind(this);
 
         this.parseEvents = function(body) {
@@ -92,20 +100,20 @@ var request = require('request'),
                         this.strangerTyping();
                         break;
                     case 'stoppedTyping':
-                        console.log('Stranger stopped typing.');
+                        this.print('Stranger stopped typing.');
                         break;
                     case 'gotMessage':
                         this.gotMessage(body[i][1]);
                         break;
                     case 'strangerDisconnected':
-                        console.log('Stranger disconnected');
+                        this.print('Stranger disconnected');
                         this.disconnect();
                         break;
                     case 'statusInfo':
                     case 'identDigests':
                         break;
                     default:
-                        console.log(body[i]);
+                        this.print(body[i]);
                         break;
                 }
             }
@@ -123,13 +131,13 @@ var request = require('request'),
                     try {
                         body = JSON.parse(body);
                     } catch (err) {
-                        console.log('Body was not JSON.');
-                        console.log(body);
+                        this.print('Body was not JSON.');
+                        this.print(body);
                         process.exit(0);
                     }
 
                     if (null === body) {
-                        console.log('Body was NULL');
+                        this.print('Body was NULL');
                         this.disconnect();
                         return;
                     }
@@ -162,8 +170,8 @@ var request = require('request'),
                     headers: headers
                 },
                 function(err, response, body) {
-                    console.log('Looking for a random');
-                }
+                    this.print('Looking for a random');
+                }.bind(this)
             );
         }.bind(this);
 
@@ -175,9 +183,9 @@ var request = require('request'),
                     headers: headers
                 },
                 function(err, response, body) {
-                    console.log('Disconnected.');
+                    this.print('Disconnected.');
                     process.exit(0);
-                }
+                }.bind(this)
             );
         }.bind(this);
 
@@ -196,12 +204,13 @@ var request = require('request'),
         }.bind(this);
 
         this.init = function() {
-            var rl = readline.createInterface({
+            this.rl = readline.createInterface({
                 input: process.stdin,
                 output: process.stdout
             })
             .on('line', function(data) {
                 this.send(data);
+                this.rl.prompt(true);
             }.bind(this))
             .on('pause', function() {
                 this.typing();
