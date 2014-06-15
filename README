@@ -1,4 +1,4 @@
-Omegcli, version 0.3
+Omegcli, version 0.4
 
 Uses the Omegle API to chat to people.
 
@@ -19,6 +19,8 @@ You: Hello there!
 >
 
 If you specify a phrase called "start" it will be run when you connect.
+
+The option "log" specifies whether you would like to create a log file in the logs/ directory for each conversation.
 
 Warning: This program will die unexpectedly all the time due to lack of decent error checking.
 
