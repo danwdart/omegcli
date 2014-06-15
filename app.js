@@ -5,6 +5,7 @@ var request = require('request'),
     objConfig = require('./config'),
     arrTopics = objConfig.likes,
     objPhrases = objConfig.phrases,
+    bLog = objConfig.log,
     App = function() {
         var endpoint = 'http://front2.omegle.com',
             strUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.132 Safari/537.36',
@@ -21,6 +22,7 @@ var request = require('request'),
         this.clientID = null;
         this.isConnected = false;
         this.rl = null;
+        this.logFilename = null;
 
         this.start = function() {
             this.login();
@@ -62,6 +64,7 @@ var request = require('request'),
 
         this.commonLikes = function(arrCommonLikes) {
             this.print('Common likes: '+arrCommonLikes.join(', '));
+            this.writeToFile('Common likes: '+arrCommonLikes.join(', '));
         }.bind(this);
 
         this.strangerTyping = function() {
@@ -77,6 +80,7 @@ var request = require('request'),
                 this.connected();
             }
             this.print('Stranger: '+msg);
+            this.writeToFile('Stranger: '+msg);
         }.bind(this);
 
         this.print = function(msg) {
@@ -109,6 +113,7 @@ var request = require('request'),
                         break;
                     case 'strangerDisconnected':
                         console.log('Stranger disconnected');
+                        this.writeToFile('Stranger disconnected');
                         this.disconnect();
                         break;
                     case 'statusInfo':
@@ -189,6 +194,8 @@ var request = require('request'),
                     process.exit(0);
                 }.bind(this)
             );
+
+            this.writeToFile('Disconnected');
         }.bind(this);
 
         this.send = function(text) {
@@ -209,8 +216,25 @@ var request = require('request'),
                 },
                 function(err, response, body) {
                     this.print("You: "+text);
+                    this.writeToFile('You: '+text);
                 }.bind(this)
-            )
+            );
+        }.bind(this);
+
+        this.writeToFile = function(data) {
+            if (false === bLog) {
+                return;
+            }
+
+            fs.appendFile(
+                this.logFilename,
+                data + "\n",
+                {
+                    mode: 0600
+                },
+                function() {
+                }
+            );
         }.bind(this);
 
         this.startPhrase = function() {
@@ -242,6 +266,13 @@ var request = require('request'),
         }.bind(this);
 
         this.setupEvents = function() {
+            var date = new Date();
+            this.logFilename = __dirname +
+                '/logs/' +
+                date.toISOString() +
+                '.log';
+            console.log('Logging to '+this.logFilename);
+
             process.on('SIGINT', function() {
                 this.disconnect();
             }.bind(this));
