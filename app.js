@@ -2,7 +2,9 @@ var request = require('request'),
     readline = require('readline'),
     fs = require('fs'),
     querystring = require('querystring'),
-    arrTopics = require('./likes'),
+    objConfig = require('./config'),
+    arrTopics = objConfig.likes,
+    objPhrases = objConfig.phrases,
     App = function() {
         var endpoint = 'http://front2.omegle.com',
             strUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.132 Safari/537.36',
@@ -190,8 +192,15 @@ var request = require('request'),
         }.bind(this);
 
         this.send = function(text) {
-            var lH = headers;
+            var lH = headers,
+                phrase = null;
             lH.Accept = 'text/javascript, text/html, application/xml, text/xml, */*';
+            if ('/' == text[0]) {
+                phrase = objPhrases[text.substr(1,text.length)];
+                if ('undefined' !== typeof phrase) {
+                    text = phrase;
+                }
+            }
             request.post(
                 endpoint+'/send',
                 {
@@ -199,8 +208,15 @@ var request = require('request'),
                     headers: lH
                 },
                 function(err, response, body) {
-                }
+                    this.print("You: "+text);
+                }.bind(this)
             )
+        }.bind(this);
+
+        this.startPhrase = function() {
+            if ('undefined' !== typeof objPhrases.start) {
+                this.send(objPhrases.start);
+            }
         }.bind(this);
 
         this.init = function() {
@@ -221,6 +237,8 @@ var request = require('request'),
             .on('SIGINT', function() {
                 this.disconnect();
             }.bind(this));
+
+            this.startPhrase();
         }.bind(this);
 
         this.setupEvents = function() {
