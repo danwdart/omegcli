@@ -3,9 +3,6 @@
   "version": "0.0.0",
   "description": "Omegle in the CLI",
   "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git://github.com/dandart/omegcli.git"
