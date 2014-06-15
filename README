@@ -1,3 +1,5 @@
+Omegcli, version 0.3
+
 Uses the Omegle API to chat to people.
 
 Unimplemented: Giving up and trying randoms, cameras.
@@ -8,9 +10,17 @@ Licence: WTFPL
 
 This took me 6 hours to learn and write and fix bugs in, so don't expect much.
 
-Requires a "likes.json" in $PWD with an array of common shared topics.
+Copy and edit "config.sample.json" and call it "config.json".
+"likes" are common shared topics and "phrases" are quick commands/shortcuts,
+usable like:
 
-Will die unexpectedly all the time due to lack of decent error checking.
+> /hi
+You: Hello there!
+>
+
+If you specify a phrase called "start" it will be run when you connect.
+
+Warning: This program will die unexpectedly all the time due to lack of decent error checking.
 
 Works for me, YMMV.
 
