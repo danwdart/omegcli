@@ -131,13 +131,13 @@ var request = require('request'),
                     try {
                         body = JSON.parse(body);
                     } catch (err) {
-                        this.print('Body was not JSON.');
-                        this.print(body);
+                        console.log('Body was not JSON.');
+                        console.log(body);
                         process.exit(0);
                     }
 
                     if (null === body) {
-                        this.print('Body was NULL');
+                        console.log('Body was NULL');
                         this.disconnect();
                         return;
                     }
@@ -183,7 +183,7 @@ var request = require('request'),
                     headers: headers
                 },
                 function(err, response, body) {
-                    this.print('Disconnected.');
+                    console.log('Disconnected.');
                     process.exit(0);
                 }.bind(this)
             );
