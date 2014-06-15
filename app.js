@@ -108,7 +108,7 @@ var request = require('request'),
                         this.gotMessage(body[i][1]);
                         break;
                     case 'strangerDisconnected':
-                        this.print('Stranger disconnected');
+                        console.log('Stranger disconnected');
                         this.disconnect();
                         break;
                     case 'statusInfo':
