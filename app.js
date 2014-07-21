@@ -3,7 +3,7 @@ var request = require('request'),
     fs = require('fs'),
     querystring = require('querystring'),
     objConfig = require('./config'),
-    arrTopics = objConfig.likes,
+    arrTopics = ('undefined' !== typeof process.argv[2])?process.argv[2].split(','):objConfig.likes,
     objPhrases = objConfig.phrases,
     bLog = objConfig.log,
     App = function() {
