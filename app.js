@@ -119,12 +119,18 @@ var request = require('request'),
                     case 'statusInfo':
                     case 'identDigests':
                         break;
+                    case 'error':
+                    	console.log('Encountered an error: '+body[i][1]);
+                    	console.log('Last request was ', this.lastResponse)
+                    	break;
                     default:
-                        this.print(body[i]);
+                    	console.log(body[i]);
                         break;
                 }
             }
         }.bind(this);
+
+        this.lastResponse = null;
 
         this.events = function() {
             request.post(
@@ -135,6 +141,7 @@ var request = require('request'),
                 },
                 function(err, response, body) {
                     if (err) throw err;
+                    this.lastResponse = response;
                     try {
                         body = JSON.parse(body);
                     } catch (err) {
@@ -145,8 +152,6 @@ var request = require('request'),
 
                     if (null === body) {
                         console.log('Body was NULL');
-                        this.disconnect();
-                        return;
                     }
 
                     this.parseEvents(body);
