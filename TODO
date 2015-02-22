@@ -1,0 +1,16 @@
+Doesn't work in screen:
+
+[ 'error', 'Parameter error.' ] 
+                                
+TypeError: Cannot call method 'prompt' of null
+    at null.<anonymous> (/home/dan/www/omegcli/app.js:90:21)
+    at null.<anonymous> (/home/dan/www/omegcli/app.js:123:30)
+    at null.<anonymous> (/home/dan/www/omegcli/app.js:52:30)
+    at Request.self.callback (/home/dan/www/omegcli/node_modules/request/request.js:121:22)
+    at Request.emit (events.js:98:17)
+    at Request.<anonymous> (/home/dan/www/omegcli/node_modules/request/request.js:985:14)
+    at Request.emit (events.js:117:20)
+    at IncomingMessage.<anonymous> (/home/dan/www/omegcli/node_modules/request/request.js:936:12)
+    at IncomingMessage.emit (events.js:117:20)
+    at _stream_readable.js:929:16
+
