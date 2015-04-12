@@ -1,12 +1,12 @@
-import * as request from 'request';
-import * as readline from 'readline';
-import * as fs from 'fs';
-import * as querystring from 'querystring';
-import * as objConfig from './config';
+import request from 'request';
+import readline from 'readline';
+import fs from 'fs';
+import querystring from 'querystring';
+import objConfig from './config';
 
 var arrTopics = ('undefined' !== typeof process.argv[3])?process.argv[3].split(','):objConfig.likes,
     {phrases, log} = objConfig,
-    endpoint = 'http://front4.omegle.com',
+    endpoint = 'http://front6.omegle.com',
     strUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.101 Safari/537.36',
     headers = {
         'Referer': 'http://www.omegle.com/',
@@ -242,7 +242,7 @@ class App
             this.logFilename,
             data + "\n",
             {
-                mode: 0600
+                mode: '0600'
             },
             () => {}
         );
