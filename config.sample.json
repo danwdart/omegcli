@@ -9,5 +9,12 @@
 		"cars",
 		"fish",
 		"sillydances"
-	]
+	],
+	"bannedPhrases": [
+		"hey u want to see something",
+		"hey u wanna see something"
+	],
+	"autoPhrases": {
+		"asl": "Hello I am [age], [gender(s) if any], [location]"
+	}
 }
