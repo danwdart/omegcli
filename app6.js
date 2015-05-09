@@ -1,11 +1,11 @@
-import * as request from 'request';
-import * as readline from 'readline';
-import * as fs from 'fs';
-import * as querystring from 'querystring';
-import * as objConfig from './config';
+import request from 'request';
+import readline from 'readline';
+import fs from 'fs';
+import querystring from 'querystring';
+import objConfig from './config';
 
-var arrTopics = ('undefined' !== typeof process.argv[3])?process.argv[3].split(','):objConfig.likes,
-    {phrases, log} = objConfig,
+var arrTopics = ('undefined' !== typeof process.argv[2])?process.argv[2].split(','):objConfig.likes,
+    {phrases, log, bannedPhrases, autoPhrases} = objConfig,
     endpoint = 'http://front4.omegle.com',
     strUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.101 Safari/537.36',
     headers = {
@@ -22,7 +22,7 @@ class App
 {
 	constructor()
 	{
-        this.randid = (Math.floor(Math.random() * 100000000000 + 100000000000)).toString(36).toUpperCase();
+        this.randid = (Math.floor(Math.random() * 1000000000 + 1000000000)).toString(36).toUpperCase();
         this.clientID = null;
         this.isConnected = false;
         this.rl = null;
@@ -32,7 +32,7 @@ class App
 	start()
 	{
 		this.login();
-        	this.setupEvents();
+        this.setupEvents();
 	}
 
 	login()
@@ -55,7 +55,7 @@ class App
                 body = JSON.parse(body);
                 console.log('Response received. Initialising.');
                 this.clientID = body.clientID;
-                if ('undefined' !== typeof this.events) {
+                if ('undefined' !== typeof body.events) {
                     this.parseEvents(body.events);
                 }
                 this.events();
@@ -66,28 +66,42 @@ class App
 	connected()
 	{
 		this.isConnected = true;
-        	console.log('Connected.');
-        	this.init();
+    	console.log('Connected.');
+    	this.init();
 	}
 
 	commonLikes(arrCommonLikes)
 	{
 		this.print('Common likes: '+arrCommonLikes.join(', '));
-        	this.writeToFile('Common likes: '+arrCommonLikes.join(', '));
+        this.writeToFile('Common likes: '+arrCommonLikes.join(', '));
 	}
 
 	strangerTyping()
 	{
 		if (!this.isConnected) {
-            		this.connected();
-        	}
-	   	this.print('Stranger typing...');
+        	this.connected();
+    	}
+       	this.print('Stranger typing...');
 	}
 
 	gotMessage(msg)
 	{
 		if (!this.isConnected) {
             this.connected();
+        }
+        for (var i in bannedPhrases) {
+            if (-1 !== msg.indexOf(bannedPhrases[i])) {
+                this.print('Stranger said a banned phrase, disconnecting: '+msg);
+                this.writeToFile('Stranger said a banned phrase, disconnecting: '+msg);
+                return this.disconnect();
+            }
+        }
+        for (var phrase in autoPhrases) {
+            if (-1 !== msg.toLowerCase().indexOf(phrase.toLowerCase())) {
+                this.print('Stranger (will auto-reply): '+msg);
+                this.writeToFile('Stranger (will auto-reply): '+msg);
+                return this.send(autoPhrases[phrase]);
+            }
         }
         this.print('Stranger: '+msg);
         this.writeToFile('Stranger: '+msg);
@@ -160,11 +174,11 @@ class App
 
                 if (null === body) {
                     console.log('Body was NULL');
-			process.exit(1);
+                    process.exit(1);
                 }
-		else {
-	                this.parseEvents(body);
-		}
+                else {
+                    this.parseEvents(body);
+                }
                 this.events();
             }
         );
@@ -172,13 +186,13 @@ class App
 
 	typing()
 	{
-		var lH = headers;
-        lH.Accept = 'text/javascript, text/html, application/xml, text/xml, */*';
+		var localHeader = headers;
+        localHeader.Accept = 'text/javascript, text/html, application/xml, text/xml, */*';
         request.post(
             endpoint+'/typing',
             {
                 body: 'id='+querystring.escape(this.clientID),
-                headers: lH
+                headers: localHeader
             },
             (err, response, body) => {}
         );
@@ -212,9 +226,9 @@ class App
 
 	send(text)
 	{
-		var lH = headers,
+		var localHeader = headers,
             phrase = null;
-        lH.Accept = 'text/javascript, text/html, application/xml, text/xml, */*';
+        localHeader.Accept = 'text/javascript, text/html, application/xml, text/xml, */*';
         if ('/' == text[0]) {
             phrase = phrases[text.substr(1,text.length)];
             if ('undefined' !== typeof phrase) {
@@ -225,7 +239,7 @@ class App
             endpoint+'/send',
             {
                 body: 'msg='+querystring.escape(text)+'&id='+querystring.escape(this.clientID),
-                headers: lH
+                headers: localHeader
             },
             (err, response, body) => {
                 this.print("You: "+text);
@@ -242,7 +256,7 @@ class App
             this.logFilename,
             data + "\n",
             {
-                mode: 0600
+                mode: 0o600
             },
             () => {}
         );
