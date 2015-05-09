@@ -7,6 +7,7 @@ import objConfig from './config';
 var arrTopics = ('undefined' !== typeof process.argv[2])?process.argv[2].split(','):objConfig.likes,
     {phrases, log, bannedPhrases, autoPhrases} = objConfig,
     endpoint = 'http://front4.omegle.com',
+    strUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36',
     headers = {
         'Referer': 'http://www.omegle.com/',
         'User-Agent': strUserAgent,
