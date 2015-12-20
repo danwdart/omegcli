@@ -1,98 +1,147 @@
-var request = require('request'),
-    readline = require('readline'),
-    fs = require('fs'),
-    querystring = require('querystring'),
-    objConfig = require('./config'),
-    arrTopics = ('undefined' !== typeof process.argv[2])?process.argv[2].split(','):objConfig.likes,
-    objPhrases = objConfig.phrases,
-    bLog = objConfig.log,
-    App = function() {
-        var endpoint = 'http://front2.omegle.com',
-            strUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.132 Safari/537.36',
-            headers = {
-                'Referer': 'http://www.omegle.com/',
-                'User-Agent': strUserAgent,
-                'Cache-Control': 'no-cache',
-                'Origin': 'http://www.omegle.com',
-                'Accept': 'application/json',
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-            };
+'use strict';
 
-        this.randid = (Math.floor(Math.random() * 100000000000 + 100000000000)).toString(36).toUpperCase();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _request = require('request');
+
+var _request2 = _interopRequireDefault(_request);
+
+var _readline = require('readline');
+
+var _readline2 = _interopRequireDefault(_readline);
+
+var _fs = require('fs');
+
+var _fs2 = _interopRequireDefault(_fs);
+
+var _querystring = require('querystring');
+
+var _querystring2 = _interopRequireDefault(_querystring);
+
+var _config = require('./config');
+
+var _config2 = _interopRequireDefault(_config);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var arrTopics = 'undefined' !== typeof process.argv[2] ? process.argv[2].split(',') : _config2.default.likes;
+var phrases = _config2.default.phrases;
+var log = _config2.default.log;
+var bannedPhrases = _config2.default.bannedPhrases;
+var autoPhrases = _config2.default.autoPhrases;
+var endpoint = 'http://front4.omegle.com';
+var strUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36';
+var headers = {
+    'Referer': 'http://www.omegle.com/',
+    'User-Agent': strUserAgent,
+    'Cache-Control': 'no-cache',
+    'Origin': 'http://www.omegle.com',
+    'Accept': 'application/json',
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+};
+var app;
+var App = (function () {
+    function App() {
+        _classCallCheck(this, App);
+
+        this.randid = Math.floor(Math.random() * 1000000000 + 1000000000).toString(36).toUpperCase();
         this.clientID = null;
         this.isConnected = false;
         this.rl = null;
         this.logFilename = null;
+    }
 
-        this.start = function() {
+    _createClass(App, [{
+        key: 'start',
+        value: function start() {
             this.login();
             this.setupEvents();
-        }.bind(this);
+        }
+    }, {
+        key: 'login',
+        value: function login() {
+            var _this = this;
 
-        this.login = function() {
             var query = {
-                    rcs: 1,
-                    firstevents: 1,
-                    spid: '',
-                    randid: this.randid,
-                    topics: JSON.stringify(arrTopics),
-                    lang: 'en'
-                };
-            console.log('Connecting with likes '+arrTopics.join(', '));
-            request.post(
-                endpoint+'/start?'+querystring.encode(query),
-                {},
-                function(err, response, body) {
-                    if (err) throw err;
+                rcs: 1,
+                firstevents: 1,
+                spid: '',
+                randid: this.randid,
+                topics: JSON.stringify(arrTopics),
+                lang: 'en'
+            };
+            console.log('Connecting with likes ' + arrTopics.join(', '));
+            _request2.default.post(endpoint + '/start?' + _querystring2.default.encode(query), {}, function (err, response, body) {
+                if (err) throw err;
 
-                    body = JSON.parse(body);
-                    console.log('Response received. Initialising.');
-                    this.clientID = body.clientID;
-                    if ('undefined' !== typeof this.events) {
-                        this.parseEvents(body.events);
-                    }
-                    this.events();
-                }.bind(this)
-            );
-        }.bind(this);
-
-        this.connected = function() {
+                body = JSON.parse(body);
+                console.log('Response received. Initialising.');
+                _this.clientID = body.clientID;
+                if ('undefined' !== typeof body.events) {
+                    _this.parseEvents(body.events);
+                }
+                _this.events();
+            });
+        }
+    }, {
+        key: 'connected',
+        value: function connected() {
             this.isConnected = true;
             console.log('Connected.');
             this.init();
-        }.bind(this);
-
-        this.commonLikes = function(arrCommonLikes) {
-            this.print('Common likes: '+arrCommonLikes.join(', '));
-            this.writeToFile('Common likes: '+arrCommonLikes.join(', '));
-        }.bind(this);
-
-        this.strangerTyping = function() {
+        }
+    }, {
+        key: 'commonLikes',
+        value: function commonLikes(arrCommonLikes) {
+            this.print('Common likes: ' + arrCommonLikes.join(', '));
+            this.writeToFile('Common likes: ' + arrCommonLikes.join(', '));
+        }
+    }, {
+        key: 'strangerTyping',
+        value: function strangerTyping() {
             if (!this.isConnected) {
                 this.connected();
             }
-
             this.print('Stranger typing...');
-        }.bind(this);
-
-        this.gotMessage = function(msg) {
+        }
+    }, {
+        key: 'gotMessage',
+        value: function gotMessage(msg) {
             if (!this.isConnected) {
                 this.connected();
             }
-            this.print('Stranger: '+msg);
-            this.writeToFile('Stranger: '+msg);
-        }.bind(this);
-
-        this.print = function(msg) {
+            for (var i in bannedPhrases) {
+                if (-1 !== msg.indexOf(bannedPhrases[i])) {
+                    this.print('Stranger said a banned phrase, disconnecting: ' + msg);
+                    this.writeToFile('Stranger said a banned phrase, disconnecting: ' + msg);
+                    return this.disconnect();
+                }
+            }
+            for (var phrase in autoPhrases) {
+                if (-1 !== msg.toLowerCase().indexOf(phrase.toLowerCase())) {
+                    this.print('Stranger (will auto-reply): ' + msg);
+                    this.writeToFile('Stranger (will auto-reply): ' + msg);
+                    return this.send(autoPhrases[phrase]);
+                }
+            }
+            this.print('Stranger: ' + msg);
+            this.writeToFile('Stranger: ' + msg);
+        }
+    }, {
+        key: 'print',
+        value: function print(msg) {
             process.stdout.clearLine();
             process.stdout.cursorTo(0);
             console.log(msg);
             this.rl.prompt(true);
-        }.bind(this);
-
-        this.parseEvents = function(body) {
+        }
+    }, {
+        key: 'parseEvents',
+        value: function parseEvents(body) {
             for (var i = 0; i < body.length; i++) {
-                switch(body[i][0]) {
+                switch (body[i][0]) {
                     case 'waiting':
                         console.log('Waiting...');
                         break;
@@ -120,168 +169,149 @@ var request = require('request'),
                     case 'identDigests':
                         break;
                     case 'error':
-                    	console.log('Encountered an error: '+body[i][1]);
-                    	console.log('Last request was ', this.lastResponse)
-                    	break;
+                        console.log('Encountered an error: ' + body[i][1]);
+                        console.log('Last request was ', body);
+                        break;
                     default:
-                    	console.log(body[i]);
+                        console.log(body[i]);
                         break;
                 }
             }
-        }.bind(this);
+        }
+    }, {
+        key: 'events',
+        value: function events() {
+            var _this2 = this;
 
-        this.lastResponse = null;
-
-        this.events = function() {
-            request.post(
-                endpoint+'/events',
-                {
-                    body: 'id='+querystring.escape(this.clientID),
-                    headers: headers
-                },
-                function(err, response, body) {
-                    if (err) throw err;
-                    this.lastResponse = response;
-                    try {
-                        body = JSON.parse(body);
-                    } catch (err) {
-                        console.log('Body was not JSON.');
-                        console.log(body);
-                        process.exit(0);
-                    }
-
-                    if (null === body) {
-                        console.log('Body was NULL');
-                    }
-
-                    this.parseEvents(body);
-                    this.events();
-                }.bind(this)
-            );
-        }.bind(this);
-
-        this.typing = function() {
-            var lH = headers;
-            lH.Accept = 'text/javascript, text/html, application/xml, text/xml, */*';
-            request.post(
-                endpoint+'/typing',
-                {
-                    body: 'id='+querystring.escape(this.clientID),
-                    headers: lH
-                },
-                function(err, response, body) {
-                }
-            );
-        }.bind(this);
-
-        this.bored = function() {
-            request.post(
-                endpoint+'/stoplookingforcommonlikes',
-                {
-                    body: 'id='+querystring.escape(this.clientID),
-                    headers: headers
-                },
-                function(err, response, body) {
-                    this.print('Looking for a random');
-                }.bind(this)
-            );
-        }.bind(this);
-
-        this.disconnect = function() {
-            request.post(
-                endpoint+'/disconnect',
-                {
-                    body: 'id='+querystring.escape(this.clientID),
-                    headers: headers
-                },
-                function(err, response, body) {
-                    console.log('Disconnected.');
+            var body = 'id=' + _querystring2.default.escape(this.clientID);
+            _request2.default.post(endpoint + '/events', { body: body, headers: headers }, function (err, response, body) {
+                if (err) throw err;
+                try {
+                    body = JSON.parse(body);
+                } catch (err) {
+                    console.log('Body was not JSON.');
+                    console.log(body);
                     process.exit(0);
-                }.bind(this)
-            );
+                }
 
-            this.writeToFile('Disconnected');
-        }.bind(this);
+                if (null === body) {
+                    console.log('Body was NULL');
+                    process.exit(1);
+                } else {
+                    _this2.parseEvents(body);
+                }
+                _this2.events();
+            });
+        }
+    }, {
+        key: 'typing',
+        value: function typing() {
+            var localHeader = headers;
+            localHeader.Accept = 'text/javascript, text/html, application/xml, text/xml, */*';
+            _request2.default.post(endpoint + '/typing', {
+                body: 'id=' + _querystring2.default.escape(this.clientID),
+                headers: localHeader
+            }, function (err, response, body) {});
+        }
+    }, {
+        key: 'bored',
+        value: function bored() {
+            var _this3 = this;
 
-        this.send = function(text) {
-            var lH = headers,
+            var body = 'id=' + _querystring2.default.escape(this.clientID);
+            _request2.default.post(endpoint + '/stoplookingforcommonlikes', { body: body, headers: headers }, function (err, response, body) {
+                _this3.print('Looking for a random');
+            });
+        }
+    }, {
+        key: 'disconnect',
+        value: function disconnect() {
+            var _this4 = this;
+
+            var body = 'id=' + _querystring2.default.escape(this.clientID);
+            _request2.default.post(endpoint + '/disconnect', { body: body, headers: headers }, function (err, response, body) {
+                console.log('Disconnected.');
+                _this4.writeToFile('Disconnected');
+                process.exit(0);
+            });
+        }
+    }, {
+        key: 'send',
+        value: function send(text) {
+            var _this5 = this;
+
+            var localHeader = headers,
                 phrase = null;
-            lH.Accept = 'text/javascript, text/html, application/xml, text/xml, */*';
+            localHeader.Accept = 'text/javascript, text/html, application/xml, text/xml, */*';
             if ('/' == text[0]) {
-                phrase = objPhrases[text.substr(1,text.length)];
+                phrase = phrases[text.substr(1, text.length)];
                 if ('undefined' !== typeof phrase) {
                     text = phrase;
                 }
             }
-            request.post(
-                endpoint+'/send',
-                {
-                    body: 'msg='+querystring.escape(text)+'&id='+querystring.escape(this.clientID),
-                    headers: lH
-                },
-                function(err, response, body) {
-                    this.print("You: "+text);
-                    this.writeToFile('You: '+text);
-                }.bind(this)
-            );
-        }.bind(this);
+            _request2.default.post(endpoint + '/send', {
+                body: 'msg=' + _querystring2.default.escape(text) + '&id=' + _querystring2.default.escape(this.clientID),
+                headers: localHeader
+            }, function (err, response, body) {
+                _this5.print("You: " + text);
+                _this5.writeToFile('You: ' + text);
+            });
+        }
+    }, {
+        key: 'writeToFile',
+        value: function writeToFile(data) {
+            if (false === log) return;
 
-        this.writeToFile = function(data) {
-            if (false === bLog) {
-                return;
+            _fs2.default.appendFile(this.logFilename, data + "\n", {
+                mode: 384
+            }, function () {});
+        }
+    }, {
+        key: 'startPhrase',
+        value: function startPhrase() {
+            if ('undefined' !== typeof phrases.start) {
+                this.send(phrases.start);
             }
+        }
+    }, {
+        key: 'init',
+        value: function init() {
+            var _this6 = this;
 
-            fs.appendFile(
-                this.logFilename,
-                data + "\n",
-                {
-                    mode: 0600
-                },
-                function() {
-                }
-            );
-        }.bind(this);
-
-        this.startPhrase = function() {
-            if ('undefined' !== typeof objPhrases.start) {
-                this.send(objPhrases.start);
-            }
-        }.bind(this);
-
-        this.init = function() {
-            this.rl = readline.createInterface({
+            this.rl = _readline2.default.createInterface({
                 input: process.stdin,
                 output: process.stdout
-            })
-            .on('line', function(data) {
-                this.send(data);
-                this.rl.prompt(true);
-            }.bind(this))
-            .on('pause', function() {
-                this.typing();
-            }.bind(this))
-            .on('close', function() {
-                this.disconnect();
-            }.bind(this))
-            .on('SIGINT', function() {
-                this.disconnect();
-            }.bind(this));
+            }).on('line', function (data) {
+                _this6.send(data);
+                _this6.rl.prompt(true);
+            }).on('pause', function () {
+                _this6.typing();
+            }).on('close', function () {
+                _this6.disconnect();
+            }).on('SIGINT', function () {
+                _this6.disconnect();
+            });
 
             this.startPhrase();
-        }.bind(this);
+        }
+    }, {
+        key: 'setupEvents',
+        value: function setupEvents() {
+            var _this7 = this;
 
-        this.setupEvents = function() {
             var date = new Date();
-            this.logFilename = __dirname +
-                '/logs/' +
-                date.toISOString() +
-                '.log';
-            console.log('Logging to '+this.logFilename);
+            this.logFilename = __dirname + '/logs/' + date.toISOString() + '.log';
+            console.log('Logging to ' + this.logFilename);
 
-            process.on('SIGINT', function() {
-                this.disconnect();
-            }.bind(this));
-        };
-    },
-    app = new App();
+            process.on('SIGINT', function () {
+                _this7.disconnect();
+            });
+        }
+    }]);
+
+    return App;
+})();
+
+app = new App();
 app.start();
+
