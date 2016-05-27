@@ -16,5 +16,8 @@
 	],
 	"autoPhrases": {
 		"asl": "Hello I am [age], [gender(s) if any], [location]"
-	}
+	},
+    "rxBannedPhrases": [
+        "\d{16}"
+    ]
 }
