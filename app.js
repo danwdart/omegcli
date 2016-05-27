@@ -1,6 +1,6 @@
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _request = require('request');
 
@@ -30,6 +30,7 @@ var arrTopics = 'undefined' !== typeof process.argv[2] ? process.argv[2].split('
 var phrases = _config2.default.phrases;
 var log = _config2.default.log;
 var bannedPhrases = _config2.default.bannedPhrases;
+var rxBannedPhrases = _config2.default.rxBannedPhrases;
 var autoPhrases = _config2.default.autoPhrases;
 var endpoint = 'http://front4.omegle.com';
 var strUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36';
@@ -41,8 +42,8 @@ var headers = {
     'Accept': 'application/json',
     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
 };
-var app;
-var App = (function () {
+var app = undefined;
+var App = function () {
     function App() {
         _classCallCheck(this, App);
 
@@ -119,6 +120,13 @@ var App = (function () {
                     return this.disconnect();
                 }
             }
+            for (var phrase in rxBannedPhrases) {
+                if (new RegExp(phrase).test(msg)) {
+                    this.print('Stranger said a banned phrase, disconnecting: ' + msg);
+                    this.writeToFile('Stranger said a banned phrase, disconnecting: ' + msg);
+                    return this.disconnect();
+                }
+            }
             for (var phrase in autoPhrases) {
                 if (-1 !== msg.toLowerCase().indexOf(phrase.toLowerCase())) {
                     this.print('Stranger (will auto-reply): ' + msg);
@@ -132,8 +140,8 @@ var App = (function () {
     }, {
         key: 'print',
         value: function print(msg) {
-            process.stdout.clearLine();
-            process.stdout.cursorTo(0);
+            //process.stdout.clearLine();
+            //process.stdout.cursorTo(0);
             console.log(msg);
             this.rl.prompt(true);
         }
@@ -310,8 +318,7 @@ var App = (function () {
     }]);
 
     return App;
-})();
+}();
 
 app = new App();
 app.start();
-

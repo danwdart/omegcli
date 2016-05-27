@@ -4,8 +4,8 @@ import fs from 'fs';
 import querystring from 'querystring';
 import objConfig from './config';
 
-var arrTopics = ('undefined' !== typeof process.argv[2])?process.argv[2].split(','):objConfig.likes,
-    {phrases, log, bannedPhrases, autoPhrases} = objConfig,
+let arrTopics = ('undefined' !== typeof process.argv[2])?process.argv[2].split(','):objConfig.likes,
+    {phrases, log, bannedPhrases, rxBannedPhrases, autoPhrases} = objConfig,
     endpoint = 'http://front4.omegle.com',
     strUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36',
     headers = {
@@ -37,7 +37,7 @@ class App
 
 	login()
 	{
-		var query = {
+		let query = {
                 rcs: 1,
                 firstevents: 1,
                 spid: '',
@@ -89,14 +89,21 @@ class App
 		if (!this.isConnected) {
             this.connected();
         }
-        for (var i in bannedPhrases) {
+        for (let i in bannedPhrases) {
             if (-1 !== msg.indexOf(bannedPhrases[i])) {
                 this.print('Stranger said a banned phrase, disconnecting: '+msg);
                 this.writeToFile('Stranger said a banned phrase, disconnecting: '+msg);
                 return this.disconnect();
             }
         }
-        for (var phrase in autoPhrases) {
+        for (let phrase in rxBannedPhrases) {
+            if (new RegExp(phrase).test(msg)) {
+                this.print('Stranger said a banned phrase, disconnecting: '+msg);
+                this.writeToFile('Stranger said a banned phrase, disconnecting: '+msg);
+                return this.disconnect();
+            }
+        }
+        for (let phrase in autoPhrases) {
             if (-1 !== msg.toLowerCase().indexOf(phrase.toLowerCase())) {
                 this.print('Stranger (will auto-reply): '+msg);
                 this.writeToFile('Stranger (will auto-reply): '+msg);
@@ -106,18 +113,18 @@ class App
         this.print('Stranger: '+msg);
         this.writeToFile('Stranger: '+msg);
 	}
-		
+
 	print(msg)
 	{
-	    process.stdout.clearLine();
-        process.stdout.cursorTo(0);
+	    //process.stdout.clearLine();
+        //process.stdout.cursorTo(0);
         console.log(msg);
         this.rl.prompt(true);
 	}
 
 	parseEvents(body)
 	{
-		for (var i = 0; i < body.length; i++) {
+		for (let i = 0; i < body.length; i++) {
             switch(body[i][0]) {
                 case 'waiting':
                     console.log('Waiting...');
@@ -158,7 +165,7 @@ class App
 
 	events()
 	{
-		var body = 'id='+querystring.escape(this.clientID);
+		let body = 'id='+querystring.escape(this.clientID);
 		request.post(
             endpoint+'/events',
             {body, headers},
@@ -186,7 +193,7 @@ class App
 
 	typing()
 	{
-		var localHeader = headers;
+		let localHeader = headers;
         localHeader.Accept = 'text/javascript, text/html, application/xml, text/xml, */*';
         request.post(
             endpoint+'/typing',
@@ -200,7 +207,7 @@ class App
 
 	bored()
 	{
-		var body = 'id='+querystring.escape(this.clientID);
+		let body = 'id='+querystring.escape(this.clientID);
 		request.post(
             endpoint+'/stoplookingforcommonlikes',
             {body, headers},
@@ -212,7 +219,7 @@ class App
 
 	disconnect()
 	{
-		var body = 'id='+querystring.escape(this.clientID);
+		let body = 'id='+querystring.escape(this.clientID);
 		request.post(
             endpoint+'/disconnect',
             {body, headers},
@@ -226,7 +233,7 @@ class App
 
 	send(text)
 	{
-		var localHeader = headers,
+		let localHeader = headers,
             phrase = null;
         localHeader.Accept = 'text/javascript, text/html, application/xml, text/xml, */*';
         if ('/' == text[0]) {
@@ -294,7 +301,7 @@ class App
 
 	setupEvents()
 	{
-		var date = new Date();
+		let date = new Date();
         this.logFilename = __dirname +
             '/logs/' +
             date.toISOString() +
