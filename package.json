@@ -4,7 +4,8 @@
   "description": "Omegle in the CLI",
   "main": "app.js",
   "scripts": {
-    "build": "babel app6.js > app.js"
+    "build": "babel app6.js > app.js",
+    "start": "node app"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
     "url": "https://github.com/dandart/omegcli/issues"
   },
   "dependencies": {
+    "notify-send": "^0.1.2",
     "request": "^2.35.0"
   },
   "devDependencies": {
