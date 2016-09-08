@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Omegle in the CLI",
   "main": "app.js",
+  "scripts": {
+    "build": "babel app6.js > app.js"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/dandart/omegcli.git"
@@ -21,5 +24,9 @@
   },
   "dependencies": {
     "request": "^2.35.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.14.0"
   }
 }
