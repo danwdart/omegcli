@@ -2,9 +2,10 @@ import request from 'request';
 import readline from 'readline';
 import fs from 'fs';
 import querystring from 'querystring';
+import notification from 'notify-send';
 import objConfig from './config';
 
-let arrTopics = ('undefined' !== typeof process.argv[2])?process.argv[2].split(','):objConfig.likes,
+const arrTopics = ('undefined' !== typeof process.argv[2])?process.argv[2].split(','):objConfig.likes,
     {phrases, log, bannedPhrases, rxBannedPhrases, autoPhrases} = objConfig,
     endpoint = 'http://front4.omegle.com',
     strUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36',
@@ -16,7 +17,9 @@ let arrTopics = ('undefined' !== typeof process.argv[2])?process.argv[2].split('
         'Accept': 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
     },
-    app;
+    notify = notification.notify;
+
+let app;
 
 class App
 {
@@ -89,29 +92,30 @@ class App
 		if (!this.isConnected) {
             this.connected();
         }
-        for (let i in bannedPhrases) {
-            if (-1 !== msg.indexOf(bannedPhrases[i])) {
-                this.print('Stranger said a banned phrase, disconnecting: '+msg);
-                this.writeToFile('Stranger said a banned phrase, disconnecting: '+msg);
+        for (let phrase of bannedPhrases) {
+            if (-1 !== msg.indexOf(phrase)) {
+                this.print(`Stranger said a banned phrase (${phrase}), disconnecting: ${msg}`);
+                this.writeToFile(`Stranger said a banned phrase (${phrase}), disconnecting: ${msg}`);
                 return this.disconnect();
             }
         }
-        for (let phrase in rxBannedPhrases) {
+        for (let phrase of rxBannedPhrases) {
             if (new RegExp(phrase).test(msg)) {
-                this.print('Stranger said a banned phrase, disconnecting: '+msg);
-                this.writeToFile('Stranger said a banned phrase, disconnecting: '+msg);
+                this.print(`Stranger said a banned phrase (${phrase}), disconnecting: ${msg}`);
+                this.writeToFile(`Stranger said a banned phrase (${phrase}), disconnecting: ${msg}`);
                 return this.disconnect();
             }
         }
         for (let phrase in autoPhrases) {
             if (-1 !== msg.toLowerCase().indexOf(phrase.toLowerCase())) {
-                this.print('Stranger (will auto-reply): '+msg);
-                this.writeToFile('Stranger (will auto-reply): '+msg);
+                this.print(`Stranger (will auto-reply): ${msg}`);
+                this.writeToFile(`Stranger (will auto-reply): ${msg}`);
                 return this.send(autoPhrases[phrase]);
             }
         }
-        this.print('Stranger: '+msg);
-        this.writeToFile('Stranger: '+msg);
+        notify('Omegle Message', msg);
+        this.print(`Stranger: ${msg}`);
+        this.writeToFile(`Stranger: ${msg}`);
 	}
 
 	print(msg)
@@ -180,8 +184,8 @@ class App
                 }
 
                 if (null === body) {
-                    console.log('Body was NULL');
-                    process.exit(1);
+                    console.log('Body was NULL, presumably the connection was severed.');
+                    process.exit(0);
                 }
                 else {
                     this.parseEvents(body);
