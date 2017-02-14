@@ -1,26 +1,32 @@
-Omegcli, version 0.4
+# Omegcli
+
+## Version 0.5
 
 Uses the Omegle API to chat to people.
 
-Unimplemented: Giving up and trying randoms, cameras.
+TODO: Giving up and trying randoms, cameras.
 
-Uses readline to do so.
+Uses readline to do so, and uses notify-send when available.
 
 Licence: WTFPL
 
-This took me 6 hours to learn and write and fix bugs in, so don't expect much.
+## Usage
 
-Copy and edit "config.sample.json" and call it "config.json".
-"likes" are common shared topics and "phrases" are quick commands/shortcuts,
+Copy and edit `config.sample.json` and call it `config.json`.
+`"likes"` are common shared topics and `"phrases"` are quick commands/shortcuts,
 usable like:
 
+```
 > /hi
 You: Hello there!
 >
+```
 
-If you specify a phrase called "start" it will be run when you connect.
+If you specify a phrase called `"start"` it will be run when you connect.
 
-The option "log" specifies whether you would like to create a log file in the logs/ directory for each conversation.
+The option `"log"` specifies whether you would like to create a log file in the `logs/` directory for each conversation.
+
+## More Info
 
 Warning: This program will die unexpectedly all the time due to lack of decent error checking.
 
