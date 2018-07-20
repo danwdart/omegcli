@@ -2,10 +2,12 @@
   "name": "omegcli",
   "version": "0.0.0",
   "description": "Omegle in the CLI",
-  "main": "app.js",
+  "main": ".app/index.js",
   "scripts": {
-    "build": "babel app6.js > app.js",
-    "start": "node app"
+    "build": "babel -d .app src",
+    "start": "node .app/index.js",
+    "test": "eslint src",
+    "watch": "babel -wd .app src"
   },
   "repository": {
     "type": "git",
@@ -28,7 +30,9 @@
     "request": "^2.87.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.14.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2"
+    "@babel/cli": "^7.0.0-beta.52",
+    "@babel/core": "^7.0.0-beta.52",
+    "@babel/plugin-transform-modules-commonjs": "^7.0.0-beta.52",
+    "eslint": "^5.1.0"
   }
 }

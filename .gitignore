@@ -1,4 +1,4 @@
 node_modules/
 config.json
 logs/
-app.js
+.app/
