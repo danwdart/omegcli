@@ -107,21 +107,18 @@ class App
         }
         for (let phrase in bannedPhrases) {
             if (new RegExp(phrase).test(msg)) {
-                this.print(`Stranger said a banned phrase (${phrase}), disconnecting: ${msg}`);
-                this.writeToFile(`Stranger said a banned phrase (${phrase}), disconnecting: ${msg}`);
+                this.printAndWrite(`Stranger said a banned phrase (${phrase}), disconnecting: ${msg}`);
                 return this.disconnect();
             }
         }
         for (let phrase in autoPhrases) {
             if (-1 !== msg.toLowerCase().indexOf(phrase.toLowerCase())) {
-                this.print(`Stranger (will auto-reply): ${msg}`);
-                this.writeToFile(`Stranger (will auto-reply): ${msg}`);
+                this.printAndWrite(`Stranger (will auto-reply): ${msg}`);
                 return this.send(autoPhrases[phrase]);
             }
         }
         notify(`Omegle Message`, msg);
-        this.print(`Stranger: ${msg}`);
-        this.writeToFile(`Stranger: ${msg}`);
+        this.printAndWrite(`Stranger: ${msg}`);
     }
 
     print(msg)
@@ -130,6 +127,12 @@ class App
         //process.stdout.cursorTo(0);
         console.log(msg);
         this.rl.prompt(true);
+    }
+
+    printAndWrite(msg)
+    {
+        this.print(msg);
+        this.writeToFile(msg);
     }
 
     parseEvents(body)
@@ -258,10 +261,7 @@ class App
                 body: `msg=`+querystring.escape(text)+`&id=`+querystring.escape(this.clientID),
                 headers: localHeader
             },
-            () => {
-                this.print(`You: `+text);
-                this.writeToFile(`You: `+text);
-            }
+            () => this.printAndWrite(`You: `+text)
         );
     }
 
