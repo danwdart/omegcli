@@ -1,5 +1,7 @@
 # Omegcli
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/danwdart/omegcli.svg)](https://greenkeeper.io/)
+
 ## Version 0.5
 
 Uses the Omegle API to chat to people.
