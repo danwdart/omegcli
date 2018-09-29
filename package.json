@@ -4,8 +4,7 @@
   "description": "Omegle in the CLI",
   "main": ".app/index.js",
   "scripts": {
-    "build": "babel -d .app src",
-    "start": "node .app/index.js",
+    "start": "node --experimental-modules src/index.mjs",
     "test": "eslint src",
     "watch": "babel -wd .app src"
   },
@@ -30,9 +29,6 @@
     "request": "^2.87.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.0.0-beta.52",
-    "@babel/core": "^7.0.0-beta.52",
-    "@babel/plugin-transform-modules-commonjs": "^7.0.0-beta.52",
     "eslint": "^5.1.0"
   }
 }
