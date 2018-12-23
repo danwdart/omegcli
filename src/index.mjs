@@ -68,7 +68,13 @@ class App
             (err, response, body) => {
                 if (err) throw err;
 
-                body = JSON.parse(body);
+                if ('string' === typeof body && 0 < body.length && '{' === body.charAt(0)) {
+                    body = JSON.parse(body);
+                }
+                if ('<' === body.charAt(0)) {
+                    fs.writeFileSync('captcha.html', body);
+                    throw new Error(`Body is actually HTML? Here it is: ${body}`)
+                }
                 console.log(`Response received. Initialising.`);
                 this.clientID = body.clientID;
                 if (`undefined` !== typeof body.events) {
@@ -185,7 +191,13 @@ class App
             (err, response, body) => {
                 if (err) throw err;
                 try {
-                    body = JSON.parse(body);
+                    if ('string' === typeof body && 0 < body.length && '{' === body.charAt(0)) {
+                        body = JSON.parse(body);
+                    }
+                    if ('<' === body.charAt(0)) {
+                        fs.writeFileSync('captcha.html', body);
+                        throw new Error(`Body is actually HTML? Here it is: ${body}`);
+                    }
                 } catch (err) {
                     console.log(`Body was not JSON.`);
                     console.log(body);
@@ -312,8 +324,7 @@ class App
     setupEvents()
     {
         let date = new Date();
-        this.logFilename = __dirname +
-            `/logs/` +
+        this.logFilename = `./logs/` +
             date.toISOString() +
             `.log`;
         console.log(`Logging to `+this.logFilename);
