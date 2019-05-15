@@ -4,9 +4,8 @@
   "description": "Omegle in the CLI",
   "main": ".app/index.js",
   "scripts": {
-    "start": "node --experimental-modules src/index.mjs",
-    "test": "eslint src",
-    "watch": "babel -wd .app src"
+    "start": "node -r esm src/index.mjs",
+    "test": "eslint src"
   },
   "repository": {
     "type": "git",
@@ -25,11 +24,12 @@
     "url": "https://github.com/dandart/omegcli/issues"
   },
   "dependencies": {
-    "node-fetch": "^2.3.0",
+    "esm": "^3.2.22",
+    "node-fetch": "^2.5.0",
     "notify-send": "^0.1.2",
-    "request": "^2.87.0"
+    "request": "^2.88.0"
   },
   "devDependencies": {
-    "eslint": "^5.1.0"
+    "eslint": "^5.16.0"
   }
 }
