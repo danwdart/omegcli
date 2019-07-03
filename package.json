@@ -28,7 +28,7 @@
   "dependencies": {
     "notify-send": "^0.1.2",
     "request": "^2.87.0",
-    "snyk": "^1.180.1"
+    "snyk": "^1.189.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
