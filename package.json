@@ -27,7 +27,7 @@
   "dependencies": {
     "esm": "^3.2.25",
     "notify-send": "^0.1.2",
-    "request": "^2.88.0",
+    "request": "^2.88.2",
     "snyk": "^2.0.0"
   },
   "devDependencies": {
