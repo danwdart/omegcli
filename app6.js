@@ -41,7 +41,8 @@ class App
 	login()
 	{
 		let query = {
-                rcs: 1,
+                caps: 'recaptcha2,t',
+                // rcs: 1,
                 firstevents: 1,
                 spid: '',
                 randid: this.randid,

@@ -28,7 +28,7 @@
     "esm": "^3.2.25",
     "notify-send": "^0.1.2",
     "request": "^2.88.2",
-    "snyk": "^2.0.0"
+    "snyk": "^1.913.0"
   },
   "devDependencies": {
     "babel-cli": "^7.0.0-beta.3",
