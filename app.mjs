@@ -3,10 +3,10 @@ import readline from 'readline';
 import fs from 'fs';
 import querystring from 'querystring';
 import notification from 'notify-send';
-import objConfig from './config';
+import objConfig from './config.json' assert { type: 'json' };
 
 const arrTopics = ('undefined' !== typeof process.argv[2])?process.argv[2].split(','):objConfig.likes,
-    {phrases, log, bannedPhrases, rxBannedPhrases, autoPhrases} = objConfig,
+    {phrases, log, bannedPhrases, rxBannedPhrases, rxAutoBannedPhrases, autoPhrases} = objConfig,
     endpoint = 'http://front4.omegle.com',
     strUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36',
     headers = {
@@ -107,6 +107,17 @@ class App
                 return this.disconnect();
             }
         }
+
+        for (let phrase in rxAutoBannedPhrases) {
+            if (new RegExp(phrase).test(msg)) {
+                this.print(`Stranger said a banned phrase matching (${phrase}), replying with ${rxAutoBannedPhrases[phrase]} and disconnecting: ${msg}`);
+                this.writeToFile(`Stranger said a banned phrase matching (${phrase}), replying with ${rxAutoBannedPhrases[phrase]} and disconnecting: ${msg}`);
+                this.send(rxAutoBannedPhrases[phrase]);
+                setTimeout(() => this.disconnect(), 500);
+                return;
+            }
+        }
+
         for (let phrase in autoPhrases) {
             if (-1 !== msg.toLowerCase().indexOf(phrase.toLowerCase())) {
                 this.print(`Stranger (will auto-reply): ${msg}`);
@@ -307,8 +318,8 @@ class App
 	setupEvents()
 	{
 		let date = new Date();
-        this.logFilename = __dirname +
-            '/logs/' +
+        this.logFilename =
+            'logs/' +
             date.toISOString() +
             '.log';
         console.log('Logging to '+this.logFilename);
