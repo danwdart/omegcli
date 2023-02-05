@@ -5,12 +5,13 @@ import querystring from 'querystring';
 import notification from 'notify-send';
 import objConfig from './config.json' assert { type: 'json' };
 
-const arrTopics = ('undefined' !== typeof process.argv[2])?process.argv[2].split(','):objConfig.likes,
-    {phrases, log, bannedPhrases, rxBannedPhrases, rxAutoBannedPhrases, autoPhrases} = objConfig,
-    endpoint = 'http://front4.omegle.com',
-    strUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36',
+const arrTopics = ('undefined' !== typeof process.argv[2]) ? process.argv[2].split(',') : objConfig.likes,
+    { phrases, log, bannedPhrases, rxBannedPhrases, rxAutoBannedPhrases, autoPhrases } = objConfig,
+    endpoint = 'https://front36.omegle.com',
+    checkEndpoint = 'https://waw4.omegle.com',
+    strUserAgent = 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/109.0',
     headers = {
-        'Referer': 'http://www.omegle.com/',
+        'Referer': 'https://www.omegle.com/',
         'User-Agent': strUserAgent,
         'Cache-Control': 'no-cache',
         'Origin': 'http://www.omegle.com',
@@ -21,76 +22,86 @@ const arrTopics = ('undefined' !== typeof process.argv[2])?process.argv[2].split
 
 let app;
 
-class App
-{
-	constructor()
-	{
-        this.randid = (Math.floor(Math.random() * 1000000000 + 1000000000)).toString(36).toUpperCase();
+class App {
+    constructor() {
+        this.randid = "SHDCVMM2"; // (Math.floor(Math.random() * 1000000000 + 1000000000)).toString(36).toUpperCase();
         this.clientID = null;
         this.isConnected = false;
         this.rl = null;
         this.logFilename = null;
-	}
+    }
 
-	start()
-	{
-		this.login();
+    start() {
+        this.login();
         this.setupEvents();
-	}
+    }
 
-	login()
-	{
-		let query = {
-                caps: 'recaptcha2,t',
-                // rcs: 1,
-                firstevents: 1,
-                spid: '',
-                randid: this.randid,
-                topics: JSON.stringify(arrTopics),
-                lang: 'en'
-            };
-        console.log('Connecting with likes '+arrTopics.join(', '));
+    login() {
         request.post(
-            endpoint+'/start?'+querystring.encode(query),
+            checkEndpoint + '/check',
             {},
             (err, response, body) => {
                 if (err) throw err;
+                this.cc = body;
+                let query = {
+                    caps: 'recaptcha2,t3',
+                    // rcs: 1,
+                    firstevents: 1,
+                    spid: '',
+                    randid: this.randid,
+                    cc: this.cc,
+                    topics: JSON.stringify(arrTopics),
+                    lang: 'en'
+                };
 
-                body = JSON.parse(body);
-                console.log('Response received. Initialising.');
-                this.clientID = body.clientID;
-                if ('undefined' !== typeof body.events) {
-                    this.parseEvents(body.events);
-                }
-                this.events();
+                request.post(
+                    endpoint + "/status?nocache=7182637182637&randid=" + this.randid,
+                    {},
+                    (err, response, body) => {
+                        if (err) throw err;
+                        
+                        console.log('Connecting with likes ' + arrTopics.join(', '));
+                        request.post(
+                            endpoint + '/start?' + querystring.encode(query),
+                            {},
+                            (err, response, body) => {
+                                if (err) throw err;
+
+                                body = JSON.parse(body);
+                                console.log('Response received. Initialising.');
+                                this.clientID = body.clientID;
+                                if ('undefined' !== typeof body.events) {
+                                    this.parseEvents(body.events);
+                                }
+                                this.events();
+                            }
+                        );
+                    }
+                );
             }
-        );
-	}
+        )
+    }
 
-	connected()
-	{
-		this.isConnected = true;
-    	console.log('Connected.');
-    	this.init();
-	}
+    connected() {
+        this.isConnected = true;
+        console.log('Connected.');
+        this.init();
+    }
 
-	commonLikes(arrCommonLikes)
-	{
-		this.print('Common likes: '+arrCommonLikes.join(', '));
-        this.writeToFile('Common likes: '+arrCommonLikes.join(', '));
-	}
+    commonLikes(arrCommonLikes) {
+        this.print('Common likes: ' + arrCommonLikes.join(', '));
+        this.writeToFile('Common likes: ' + arrCommonLikes.join(', '));
+    }
 
-	strangerTyping()
-	{
-		if (!this.isConnected) {
-        	this.connected();
-    	}
-       	this.print('Stranger typing...');
-	}
+    strangerTyping() {
+        if (!this.isConnected) {
+            this.connected();
+        }
+        this.print('Stranger typing...');
+    }
 
-	gotMessage(msg)
-	{
-		if (!this.isConnected) {
+    gotMessage(msg) {
+        if (!this.isConnected) {
             this.connected();
         }
         for (let phrase of bannedPhrases) {
@@ -128,20 +139,18 @@ class App
         notify('Omegle Message', msg);
         this.print(`Stranger: ${msg}`);
         this.writeToFile(`Stranger: ${msg}`);
-	}
+    }
 
-	print(msg)
-	{
-	    //process.stdout.clearLine();
+    print(msg) {
+        //process.stdout.clearLine();
         //process.stdout.cursorTo(0);
         console.log(msg);
         this.rl.prompt(true);
-	}
+    }
 
-	parseEvents(body)
-	{
-		for (let i = 0; i < body.length; i++) {
-            switch(body[i][0]) {
+    parseEvents(body) {
+        for (let i = 0; i < body.length; i++) {
+            switch (body[i][0]) {
                 case 'waiting':
                     console.log('Waiting...');
                     break;
@@ -169,22 +178,21 @@ class App
                 case 'identDigests':
                     break;
                 case 'error':
-                	console.log('Encountered an error: '+body[i][1]);
-                	console.log('Last request was ', body)
-                	break;
+                    console.log('Encountered an error: ' + body[i][1]);
+                    console.log('Last request was ', body)
+                    break;
                 default:
-                	console.log(body[i]);
+                    console.log(body[i]);
                     break;
             }
         }
-	}
+    }
 
-	events()
-	{
-		let body = 'id='+querystring.escape(this.clientID);
-		request.post(
-            endpoint+'/events',
-            {body, headers},
+    events() {
+        let body = 'id=' + querystring.escape(this.clientID);
+        request.post(
+            endpoint + '/events',
+            { body, headers },
             (err, response, body) => {
                 if (err) throw err;
                 try {
@@ -205,75 +213,70 @@ class App
                 this.events();
             }
         );
-	}
+    }
 
-	typing()
-	{
-		let localHeader = headers;
+    typing() {
+        let localHeader = headers;
         localHeader.Accept = 'text/javascript, text/html, application/xml, text/xml, */*';
         request.post(
-            endpoint+'/typing',
+            endpoint + '/typing',
             {
-                body: 'id='+querystring.escape(this.clientID),
+                body: 'id=' + querystring.escape(this.clientID),
                 headers: localHeader
             },
-            (err, response, body) => {}
+            (err, response, body) => { }
         );
-	}
+    }
 
-	bored()
-	{
-		let body = 'id='+querystring.escape(this.clientID);
-		request.post(
-            endpoint+'/stoplookingforcommonlikes',
-            {body, headers},
+    bored() {
+        let body = 'id=' + querystring.escape(this.clientID);
+        request.post(
+            endpoint + '/stoplookingforcommonlikes',
+            { body, headers },
             (err, response, body) => {
                 this.print('Looking for a random');
             }
         );
-	}
+    }
 
-	disconnect()
-	{
-		let body = 'id='+querystring.escape(this.clientID);
-		request.post(
-            endpoint+'/disconnect',
-            {body, headers},
+    disconnect() {
+        let body = 'id=' + querystring.escape(this.clientID);
+        request.post(
+            endpoint + '/disconnect',
+            { body, headers },
             (err, response, body) => {
                 console.log('Disconnected.');
                 this.writeToFile('Disconnected');
                 process.exit(0);
             }
         );
-	}
+    }
 
-	send(text)
-	{
-		let localHeader = headers,
+    send(text) {
+        let localHeader = headers,
             phrase = null;
         localHeader.Accept = 'text/javascript, text/html, application/xml, text/xml, */*';
         if ('/' == text[0]) {
-            phrase = phrases[text.substr(1,text.length)];
+            phrase = phrases[text.substr(1, text.length)];
             if ('undefined' !== typeof phrase) {
                 text = phrase;
             }
         }
         request.post(
-            endpoint+'/send',
+            endpoint + '/send',
             {
-                body: 'msg='+querystring.escape(text)+'&id='+querystring.escape(this.clientID),
+                body: 'msg=' + querystring.escape(text) + '&id=' + querystring.escape(this.clientID),
                 headers: localHeader
             },
             (err, response, body) => {
-                this.print("You: "+text);
-                this.writeToFile('You: '+text);
+                this.print("You: " + text);
+                this.writeToFile('You: ' + text);
             }
         );
-	}
+    }
 
-	writeToFile(data)
-	{
-		if (false === log) return;
+    writeToFile(data) {
+        if (false === log) return;
 
         fs.appendFile(
             this.logFilename,
@@ -281,53 +284,50 @@ class App
             {
                 mode: 0o600
             },
-            () => {}
+            () => { }
         );
-	}
+    }
 
-	startPhrase()
-	{
-	    if ('undefined' !== typeof phrases.start) {
-	        this.send(phrases.start);
-	    }
-	}
+    startPhrase() {
+        if ('undefined' !== typeof phrases.start) {
+            this.send(phrases.start);
+        }
+    }
 
-	init()
-	{
-		this.rl = readline.createInterface({
+    init() {
+        this.rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout
         })
-        .on('line', (data) => {
-            this.send(data);
-            this.rl.prompt(true);
-        })
-        .on('pause', () => {
-            this.typing();
-        })
-        .on('close', () => {
-            this.disconnect();
-        })
-        .on('SIGINT', () => {
-            this.disconnect();
-        });
+            .on('line', (data) => {
+                this.send(data);
+                this.rl.prompt(true);
+            })
+            .on('pause', () => {
+                this.typing();
+            })
+            .on('close', () => {
+                this.disconnect();
+            })
+            .on('SIGINT', () => {
+                this.disconnect();
+            });
 
         this.startPhrase();
-	}
+    }
 
-	setupEvents()
-	{
-		let date = new Date();
+    setupEvents() {
+        let date = new Date();
         this.logFilename =
             'logs/' +
             date.toISOString() +
             '.log';
-        console.log('Logging to '+this.logFilename);
+        console.log('Logging to ' + this.logFilename);
 
         process.on('SIGINT', () => {
             this.disconnect();
         });
-	}
+    }
 }
 
 app = new App();
