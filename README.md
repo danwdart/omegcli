@@ -1,6 +1,6 @@
 # Omegcli
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/danwdart/omegcli.svg)](https://greenkeeper.io/)
+[![Greenkeeper badge](https://badges.greenkeeper.io/emberdart/omegcli.svg)](https://greenkeeper.io/)
 
 ## Version 0.5
 
